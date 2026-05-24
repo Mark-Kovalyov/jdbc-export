@@ -1,6 +1,6 @@
-package mayton.bigdata;
+package mkovalev.bigdata;
 
-import mayton.bigdata.formatters.*;
+import mkovalev.bigdata.formatters.*;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +34,8 @@ public class JdbcExport {
     }
 
     public static void main(String[] args) throws Exception {
+        logger.info("os.name      = {}", System.getProperty("os.name"));
+        logger.info("java.version = {}", System.getProperty("java.version"));
         CommandLineParser parser = new DefaultParser();
         Options options = createOptions();
         if (args.length == 0) {
@@ -65,7 +67,12 @@ public class JdbcExport {
                 props.put("namespace", line.getOptionValue("namespace"));
             }
 
-
+            if (logger.isInfoEnabled()) {
+                logger.info("Props:");
+                for(Map.Entry<String, String> prop : props.entrySet()) {
+                    logger.info(" {} = {}", prop.getKey(), prop.getValue());
+                }
+            }
 
             try (Connection conn = DriverManager.getConnection(url);
                  Statement st = conn.createStatement()) {

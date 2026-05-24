@@ -1,8 +1,8 @@
-package mayton.bigdata.formatters;
+package mkovalev.bigdata.formatters;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
 import de.siegmar.fastcsv.writer.QuoteStrategies;
-import mayton.bigdata.JdbcExportException;
+import mkovalev.bigdata.JdbcExportException;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

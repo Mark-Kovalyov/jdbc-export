@@ -1,14 +1,15 @@
-package mayton.bigdata.formatters;
+package mkovalev.bigdata.formatters;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.DynamicMessage;
-import mayton.bigdata.JdbcExportException;
+import mkovalev.bigdata.JdbcExportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileOutputStream;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Map;
 
 public class ProtoFormatter implements ExportFormatter{
@@ -52,13 +53,20 @@ public class ProtoFormatter implements ExportFormatter{
             Descriptors.FileDescriptor descFile = Descriptors.FileDescriptor.buildFrom(fileDescriptorProto, new Descriptors.FileDescriptor[]{});
 
             Descriptors.Descriptor descProto = descFile.findMessageTypeByName(table);
-
-
             while (rs.next()) {
                 DynamicMessage.Builder messageBuilder = DynamicMessage.newBuilder(descProto);
                 for (int i = 1; i <= columnCount; i++) {
                     if (rs.getObject(i) != null) {
-                        messageBuilder.setField(descProto.findFieldByName(columnNames[i]), rs.getObject(i));
+                        Object value = rs.getObject(i);
+                        Class<? extends Object> objType = rs.getObject(i).getClass();
+                        if (objType == Timestamp.class) {
+                            Timestamp ts = rs.getTimestamp(i);
+                            // TODO: Introduce custom local date time format
+                            messageBuilder.setField(descProto.findFieldByName(columnNames[i]), ts.toLocalDateTime().toString());
+                        } else {
+                            messageBuilder.setField(descProto.findFieldByName(columnNames[i]), value);
+                        }
+
                     }
                 }
                 DynamicMessage message = messageBuilder.build();

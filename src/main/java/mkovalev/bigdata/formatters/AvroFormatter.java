@@ -1,6 +1,6 @@
-package mayton.bigdata.formatters;
+package mkovalev.bigdata.formatters;
 
-import mayton.bigdata.JdbcExportException;
+import mkovalev.bigdata.JdbcExportException;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.file.CodecFactory;
@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileOutputStream;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Map;
 
 @SuppressWarnings("java:S1135")
@@ -36,10 +37,11 @@ public class AvroFormatter implements ExportFormatter{
 
         for(int i = 1 ; i <= columnCount ; i++) {
             switch (columnTypes[i]) {
-                case "TEXT", "CHARACTER VARYING" -> fieldAssembler.optionalString(columnNames[i]);
-                case "INT", "INTEGER", "NUMERIC" -> fieldAssembler.optionalInt(columnNames[i]); // TODO: int or long?
-                case "BIGINT" -> fieldAssembler.optionalLong(columnNames[i]);
-                case "REAL", "DOUBLE PRECISION" -> fieldAssembler.optionalDouble(columnNames[i]);
+                case "timestamp"                          -> fieldAssembler.optionalString(columnNames[i]);
+                case "text", "TEXT", "CHARACTER VARYING"  -> fieldAssembler.optionalString(columnNames[i]);
+                case "int4", "INT", "INTEGER", "NUMERIC"  -> fieldAssembler.optionalInt(columnNames[i]); // TODO: int or long?
+                case "int8", "BIGINT"                     -> fieldAssembler.optionalLong(columnNames[i]);
+                case "float8", "REAL", "DOUBLE PRECISION" -> fieldAssembler.optionalDouble(columnNames[i]);
                 case "BLOB" -> fieldAssembler.optionalString(columnNames[i]); // TODO: Hex encoded?
                 default -> throw new JdbcExportException("Unable to handle type " + columnTypes[i]);
             }
@@ -62,8 +64,16 @@ public class AvroFormatter implements ExportFormatter{
                 GenericRecord tableRecord = new GenericData.Record(schema);
                 for (int i = 1; i <= columnCount; i++) {
                     if (rs.getObject(i) != null) {
-                        tableRecord.put(columnNames[i], rs.getObject(i));
-                        // TODO: Investigate for put by index is faster
+                        Object value = rs.getObject(i);
+                        Class<? extends Object> objType = rs.getObject(i).getClass();
+                        if (objType == Timestamp.class) {
+                            Timestamp ts = rs.getTimestamp(i);
+                            // TODO: Introduce custom local date time format 
+                            tableRecord.put(columnNames[i], ts.toLocalDateTime().toString());
+                        } else {
+                            tableRecord.put(columnNames[i], value);
+                            // TODO: Investigate for put by index is faster
+                        }
                     }
                 }
                 dataFileWriter.append(tableRecord);

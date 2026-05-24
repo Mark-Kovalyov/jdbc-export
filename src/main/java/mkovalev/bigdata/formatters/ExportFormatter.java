@@ -1,6 +1,6 @@
-package mayton.bigdata.formatters;
+package mkovalev.bigdata.formatters;
 
-import mayton.bigdata.JdbcExportException;
+import mkovalev.bigdata.JdbcExportException;
 
 import java.sql.ResultSet;
 import java.util.Map;

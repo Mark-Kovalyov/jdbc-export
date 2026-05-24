@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
 
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export CLASSPATH=$JAVA_HOME/lib
+export PATH=$JAVA_HOME/bin:$PATH
+
+# TODO: Does't work! Shoudl be fixed
 java -jar jdbc-export.jar $*

@@ -1,6 +1,6 @@
-package mayton.bigdata.formatters;
+package mkovalev.bigdata.formatters;
 
-import mayton.bigdata.JdbcExportException;
+import mkovalev.bigdata.JdbcExportException;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Map;
 
 @SuppressWarnings("java:S1135")
@@ -25,28 +26,40 @@ public class ParquetFormatter implements ExportFormatter{
     public void export(ResultSet rs, String query, int columnCount, String[] columnNames, String[] columnTypes,
                        String path, Map<String, String> props) throws JdbcExportException {
 
+        String hadoopVersion = org.apache.hadoop.util.VersionInfo.getVersion();
+        logger.info("Hadoop version    = {}", hadoopVersion);
+        logger.info("java.library.path = {}", System.getProperty("java.library.path"));
+
         Path outputPath   = new Path(path);
         String recordName = props.getOrDefault("recordname", "");
         String nameSpace  = props.getOrDefault("namespace", "");
 
         logger.info("recordName = {}, namespace = {}", recordName, nameSpace);
 
-        SchemaBuilder.FieldAssembler<Schema> fields = SchemaBuilder
+        SchemaBuilder.FieldAssembler<Schema> schemaBuilder = SchemaBuilder
                 .record(recordName)
                 .namespace(nameSpace).fields();
 
+        logger.info("Configure schema");
+
         for(int i = 1 ; i <= columnCount ; i++) {
+            logger.info("Column {} ({})", columnNames[i], columnTypes[i]);
             switch (columnTypes[i]) {
-                case "TEXT", "CHARACTER VARYING" -> fields.optionalString(columnNames[i]);
-                case "INT", "INTEGER", "NUMERIC" -> fields.optionalInt(columnNames[i]);
-                case "BIGINT"                    -> fields.optionalLong(columnNames[i]);
-                case "REAL", "DOUBLE PRECISION"  -> fields.optionalDouble(columnNames[i]); // TODO: What about float?
-                case "BLOB"                      -> fields.optionalBytes(columnNames[i]); // TODO: Need to check deeper
+                case "timestamp"                         -> schemaBuilder.optionalString(columnNames[i]);
+                case "text", "TEXT", "CHARACTER VARYING" -> schemaBuilder.optionalString(columnNames[i]);
+                case "int4", "INT", "INTEGER", "NUMERIC" -> schemaBuilder.optionalInt(columnNames[i]);
+                case "int8", "BIGINT"                    -> schemaBuilder.optionalLong(columnNames[i]);
+                case "float8", "REAL","DOUBLE PRECISION" -> schemaBuilder.optionalDouble(columnNames[i]);
+                case "BLOB"                              -> schemaBuilder.optionalBytes(columnNames[i]); // TODO: Need to check deeper
                 default -> throw new JdbcExportException("Unable to handle type " + columnTypes[i]);
             }
         }
 
-        Schema schema = fields.endRecord();
+        Schema schema = schemaBuilder.endRecord();
+
+        logger.info("Schema = {}", schema.toString());
+
+        logger.info("Configure compression");
 
         CompressionCodecName codec = CompressionCodecName.UNCOMPRESSED;
 
@@ -64,6 +77,8 @@ public class ParquetFormatter implements ExportFormatter{
             }
         }
 
+        logger.info("Prepare parquet writer");
+
         try(ParquetWriter<GenericRecord> writer =
                 // TODO: deprecated will be removed in 2.0.0; use {@link #builder(OutputFile)} instead.
                 AvroParquetWriter.<GenericRecord>builder(outputPath)
@@ -72,6 +87,8 @@ public class ParquetFormatter implements ExportFormatter{
                         .withCompressionCodec(codec)
                         .build()) {
 
+            logger.info("Start GenericRecord produce");
+            long cnt = 0;
             while (rs.next()) {
                 GenericRecord genericRecord = new GenericData.Record(schema);
                 for (int i = 1; i <= columnCount; i++) {
@@ -82,9 +99,10 @@ public class ParquetFormatter implements ExportFormatter{
                     }
                 }
                 writer.write(genericRecord);
+                cnt++;
             }
 
-            logger.info("There are {} records written to Parquet file", rs.getRow());
+            logger.info("There are {} records written to Parquet file", cnt);
 
         } catch (Exception ex) {
             throw new JdbcExportException("Error writing Parquet file: " + ex.getMessage(), ex);

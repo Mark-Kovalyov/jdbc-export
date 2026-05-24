@@ -1,4 +1,4 @@
-package mayton.bigdata;
+package mkovalev.bigdata;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
