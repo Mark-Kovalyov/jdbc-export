@@ -20,9 +20,12 @@ Fieatures:
   - AVRO
   - Parquet 
   - protobuf (Google Protobuf) 
-- not supported yet, but planned:
-  - Delta Table
-  - Apache ORC
+  - not supported yet, but planned:
+    - Delta Table
+    - Apache ORC
+- support native compillation using GraalVM for:
+  - Windows
+  - Linux
 
 # Exapmple
 

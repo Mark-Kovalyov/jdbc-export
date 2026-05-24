@@ -1,4 +1,4 @@
-package mayton.bigdata;
+package mkovalev.bigdata;
 
 public class JdbcExportException extends Exception {
 

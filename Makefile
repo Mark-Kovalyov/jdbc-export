@@ -3,7 +3,11 @@ build:
 	mkdir -p bin/
 	cp -f target/jdbc-export.jar bin/
 	cp -fr target/dependency/* bin/
-	cp -f src/main/resources/jdbc-export.* bin/
+	cp -f src/main/resources/jdbc-export.cmd bin/
+	cp -f src/main/resources/jdbc-export bin/
+
+test:
+	mvn clean test
 
 clean:
 	rm -f bin/*

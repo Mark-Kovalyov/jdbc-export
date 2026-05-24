@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>mayton.bigdata</groupId>
+    <groupId>mkovalev.bigdata</groupId>
     <artifactId>jdbc-export</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -16,6 +16,7 @@
              in Java 18+, which Hadoop's UserGroupInformation class relies on.  -->
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.7.36</slf4j.version>
     </properties>
@@ -146,6 +147,27 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-java</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>17</version>
+                                </requireJavaVersion>
+                            </rules>
+                            <fail>false</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>${maven.compiler.source}</source>
@@ -160,7 +182,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <Main-Class>mayton.bigdata.JdbcExport</Main-Class>
+                            <Main-Class>mkovalev.bigdata.JdbcExport</Main-Class>
                         </manifest>
                     </archive>
                     <finalName>jdbc-export</finalName>

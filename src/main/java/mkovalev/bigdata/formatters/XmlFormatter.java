@@ -1,7 +1,7 @@
-package mayton.bigdata.formatters;
+package mkovalev.bigdata.formatters;
 
 import com.ctc.wstx.stax.WstxOutputFactory;
-import mayton.bigdata.JdbcExportException;
+import mkovalev.bigdata.JdbcExportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +9,6 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InvalidObjectException;
 import java.io.OutputStream;
 import java.sql.ResultSet;
 import java.util.Map;
@@ -19,7 +18,7 @@ public class XmlFormatter implements ExportFormatter{
     static Logger logger = LoggerFactory.getLogger("xml-formatter");
 
     private static String sanitizeForXml(String text) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(text.length());
         for (char c : text.toCharArray()) {
             if (c >= 0x20 && c < 128) {
                 sb.append(c);

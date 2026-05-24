@@ -1,10 +1,9 @@
-package mayton.bigdata;
+package mkovalev.bigdata;
 
 import com.ctc.wstx.api.WstxOutputProperties;
 import com.ctc.wstx.stax.WstxOutputFactory;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.codehaus.stax2.XMLStreamWriter2;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.stream.XMLOutputFactory;
