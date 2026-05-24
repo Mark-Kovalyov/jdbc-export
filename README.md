@@ -2,6 +2,8 @@
 
 JDBC-export is tiny and flexible CLI to to export tables from JDBC compatible databases into external files (csv, json, etc)
 
+![Build Status](https://github.com/Mark-Kovalyov/jdbc-export/actions/workflows/jdbc-export-test.yml/badge.svg)
+
 Fieatures:
 - supports databases:
   - Oracle

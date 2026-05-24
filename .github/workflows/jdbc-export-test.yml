@@ -1,0 +1,32 @@
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "add-cicd" ]
+  pull_request:
+    branches: [ "add-cicd" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build with Maven
+        working-directory: .
+        run: |
+          mvn -B package --file pom.xml
+
+      - name: Run tests
+        working-directory: .
+        run: |
+          mvn test
