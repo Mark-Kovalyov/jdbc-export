@@ -19,8 +19,9 @@ public class JsonLineFormatter implements ExportFormatter {
     static Logger logger = LoggerFactory.getLogger("json-line-formatter");
 
     @Override
-    public void export(ResultSet rs, String query, int columnCount, String[] columnNames, String[] columnTypes,
+    public long export(ResultSet rs, String query, int columnCount, String[] columnNames, String[] columnTypes,
                        String path, Map<String,String> props) throws JdbcExportException {
+        long rows = 0L;
         try (JsonStream stream = new JsonStream(new FileOutputStream(path), 4096)) { // TODO: Benchmark optimal buffer size
             while (rs.next()) {
                 stream.writeObjectStart();
@@ -52,10 +53,12 @@ public class JsonLineFormatter implements ExportFormatter {
                 }
                 stream.writeObjectEnd();
                 stream.writeRaw("\n");
+                rows++;
             }
             stream.flush();
         } catch (SQLException | IOException ex) {
             throw new JdbcExportException("Exception during export: " + ex.getMessage(), ex);
         }
+        return rows;
     }
 }

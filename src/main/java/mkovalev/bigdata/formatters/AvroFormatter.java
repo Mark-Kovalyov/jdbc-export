@@ -24,14 +24,15 @@ public class AvroFormatter implements ExportFormatter{
 
     @SuppressWarnings("java:S2629")
     @Override
-    public void export(ResultSet rs, String query, int columnCount, String[] columnNames, String[] columnTypes,
+    public long export(ResultSet rs, String query, int columnCount, String[] columnNames, String[] columnTypes,
                        String path, Map<String,String> props) throws JdbcExportException {
+        long rows = 0L;
 
-        String recordName = props.getOrDefault("recordname", "");
-        String nameSpace = props.getOrDefault("namespace", "");
+        String recordName = props.getOrDefault("recordname", "defaultRecordName");
+        String nameSpace = props.getOrDefault("namespace", "defaultNamespace");
 
         SchemaBuilder.FieldAssembler<Schema> fieldAssembler = SchemaBuilder
-                .record(recordName) // TODO: Is it neccasary to add namespace?
+                .record(recordName) // TODO: Is it necessary to add namespace?
                 .namespace(nameSpace)
                 .fields();
 
@@ -77,12 +78,13 @@ public class AvroFormatter implements ExportFormatter{
                     }
                 }
                 dataFileWriter.append(tableRecord);
+                rows++;
             }
         } catch (Exception e) {
             throw new JdbcExportException("Avro export error: " + e.getMessage(), e);
         }
 
-
+        return rows;
 
     }
 }

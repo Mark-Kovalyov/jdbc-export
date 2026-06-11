@@ -112,8 +112,14 @@ public class JdbcExport {
                     pst.setFetchSize(500); // TODO Refactor with strategy pattern to avoid driver specific code in main class
                 }
                 ResultSet rs2 = pst.executeQuery();
-                formatter.export(rs2, query, columnCount, columnNames, columnTypeNames, outputFile, props);
-                logger.info("Finish export");
+                long start = System.currentTimeMillis();
+                long rows = formatter.export(rs2, query, columnCount, columnNames, columnTypeNames, outputFile, props);
+                long end = System.currentTimeMillis();
+                long elapsed = end - start;
+                logger.info("Export finished. rows = {}, elapsed_time = {} s, speed = {} rows/s",
+                        rows,
+                        elapsed,
+                        (int) ((double) rows / elapsed));
             } catch (Exception ex) {
                 logger.error("{}", ex.getMessage());
             }

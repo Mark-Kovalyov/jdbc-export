@@ -11,8 +11,9 @@ import java.util.Map;
 
 public class CsvFormatter implements ExportFormatter {
     @Override
-    public void export(ResultSet rs, String query, int columnCount, String[] columnNames, String[] columnTypes,
+    public long export(ResultSet rs, String query, int columnCount, String[] columnNames, String[] columnTypes,
                        String path, Map<String,String> props) throws JdbcExportException {
+        long rows = 0;
         try (CsvWriter csv = CsvWriter.builder()
                 .quoteCharacter('"')
                 .fieldSeparator(';')
@@ -29,11 +30,13 @@ public class CsvFormatter implements ExportFormatter {
                     row[i - 1] = rs.getString(i);
                 }
                 csv.writeRecord(row);
+                rows++;
             }
         } catch (IOException e) {
             throw new JdbcExportException("IOException during export: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new JdbcExportException("Exception during export: " + e.getMessage(), e);
         }
+        return rows;
     }
 }

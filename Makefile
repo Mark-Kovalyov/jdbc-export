@@ -14,6 +14,7 @@ test:
 	mvn clean test
 
 clean:
+	mvn clean
 	rm -f bin/*
 
 # TODO: Not tested yet
