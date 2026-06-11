@@ -31,15 +31,17 @@ public class XmlFormatter implements ExportFormatter{
 
     @Override
     @SuppressWarnings("java:S2629")
-    public void export(ResultSet rs, String query, int columnCount, String[] columnNames, String[] columnTypes,
+    public long export(ResultSet rs, String query, int columnCount, String[] columnNames, String[] columnTypes,
                        String path, Map<String,String> props) throws JdbcExportException {
         XMLOutputFactory factory = new WstxOutputFactory();
         factory.setProperty("javax.xml.stream.isRepairingNamespaces", true);
         logger.info("factory class created {}", factory.getClass());
+        long rows = 0;
         try(OutputStream fos = new FileOutputStream(path)) {
             XMLStreamWriter writer = factory.createXMLStreamWriter(fos, "utf-8");
             writer.writeStartDocument();
             writer.writeStartElement("table");
+            writer.writeCharacters("\n");
             while (rs.next()) {
                 writer.writeStartElement("row");
                 for (int i = 1; i <= columnCount; i++) {
@@ -49,14 +51,18 @@ public class XmlFormatter implements ExportFormatter{
                     }
                 }
                 writer.writeEndElement();
+                writer.writeCharacters("\n");
+                rows++;
             }
             writer.writeEndElement();
             writer.writeEndDocument();
             writer.flush();
+
         } catch (IOException e) {
             throw new JdbcExportException("IOException during export: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new JdbcExportException("Exception during export: " + e.getMessage(), e);
         }
+        return rows;
     }
 }

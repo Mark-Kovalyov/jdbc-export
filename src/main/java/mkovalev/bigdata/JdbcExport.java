@@ -34,8 +34,8 @@ public class JdbcExport {
     }
 
     public static void main(String[] args) throws Exception {
-        logger.info("os.name      = {}", System.getProperty("os.name"));
-        logger.info("java.version = {}", System.getProperty("java.version"));
+        logger.trace("os.name      = {}", System.getProperty("os.name"));
+        logger.trace("java.version = {}", System.getProperty("java.version"));
         CommandLineParser parser = new DefaultParser();
         Options options = createOptions();
         if (args.length == 0) {
@@ -74,9 +74,12 @@ public class JdbcExport {
                 }
             }
 
-            try (Connection conn = DriverManager.getConnection(url);
-                 Statement st = conn.createStatement()) {
+            try (Connection conn = DriverManager.getConnection(url)) {
+                String driverName = conn.getClass().getName().toLowerCase();
+                logger.trace("Driver Name: {}", driverName);
                 logger.info("Start analyze schema");
+                conn.setAutoCommit(false);
+                Statement st = conn.createStatement();
                 ResultSet rs = st.executeQuery(String.format("%s LIMIT 1", query));
                 ResultSetMetaData metaData = rs.getMetaData();
                 int columnCount = metaData.getColumnCount();
@@ -86,11 +89,11 @@ public class JdbcExport {
                     String columnName = metaData.getColumnName(i);
                     String columnTypeName = metaData.getColumnTypeName(i);
                     int columnTypeCode = metaData.getColumnType(i);
-                    logger.info("Column {}: {} ({}, JDBC type {})", i, columnTypeNames, columnTypeName, columnTypeCode);
+                    logger.info("Column {}: ({}, JDBC type {})", i, columnTypeName, columnTypeCode);
                     columnTypeNames[i] = columnTypeName;
                     columnNames[i] = columnName;
                 }
-
+                rs.close();
                 logger.info("Start export");
                 ExportFormatter formatter = null;
                 switch (format) {
@@ -103,9 +106,20 @@ public class JdbcExport {
                     default:
                         throw new JdbcExportException("Unknown format : " + format);
                 }
-                ResultSet rs2 = st.executeQuery(query);
-                formatter.export(rs2, query, columnCount, columnNames, columnTypeNames, outputFile, props);
-                logger.info("Finish export");
+                // This is performance advice to reduce memory overhead for Postgresql JDBC
+                PreparedStatement pst = conn.prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                if ("org.postgresql.jdbc.pgconnection".equals(driverName)) {
+                    pst.setFetchSize(500); // TODO Refactor with strategy pattern to avoid driver specific code in main class
+                }
+                ResultSet rs2 = pst.executeQuery();
+                long start = System.currentTimeMillis();
+                long rows = formatter.export(rs2, query, columnCount, columnNames, columnTypeNames, outputFile, props);
+                long end = System.currentTimeMillis();
+                long elapsed = end - start;
+                logger.info("Export finished. rows = {}, elapsed_time = {} s, speed = {} rows/s",
+                        rows,
+                        elapsed,
+                        (int) ((double) rows / elapsed));
             } catch (Exception ex) {
                 logger.error("{}", ex.getMessage());
             }
