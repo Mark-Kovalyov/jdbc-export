@@ -36,6 +36,9 @@ public class XmlFormatter implements ExportFormatter{
         XMLOutputFactory factory = new WstxOutputFactory();
         factory.setProperty("javax.xml.stream.isRepairingNamespaces", true);
         logger.info("factory class created {}", factory.getClass());
+        long cnt = 0;
+        long start = System.currentTimeMillis();
+        long elapsed = 0L;
         try(OutputStream fos = new FileOutputStream(path)) {
             XMLStreamWriter writer = factory.createXMLStreamWriter(fos, "utf-8");
             writer.writeStartDocument();
@@ -49,14 +52,18 @@ public class XmlFormatter implements ExportFormatter{
                     }
                 }
                 writer.writeEndElement();
+                cnt++;
             }
             writer.writeEndElement();
             writer.writeEndDocument();
             writer.flush();
+            elapsed = System.currentTimeMillis() - start;
         } catch (IOException e) {
             throw new JdbcExportException("IOException during export: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new JdbcExportException("Exception during export: " + e.getMessage(), e);
+        } finally {
+            logger.info("Export finished. rows = {}, elapsed_time = {} s, speed = {} rows/s", cnt, elapsed, (double) cnt / elapsed);
         }
     }
 }

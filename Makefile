@@ -6,13 +6,21 @@ build:
 	cp -f src/main/resources/jdbc-export.cmd bin/
 	cp -f src/main/resources/jdbc-export bin/
 
+fatjar:
+	# TODO: Implemeent
+	mvn clean package
+
 test:
 	mvn clean test
 
 clean:
 	rm -f bin/*
 
-build-graal: build
-	cd bin && native-image -jar jdbc-export.jar --no-fallback
+# TODO: Not tested yet
+build-graal: build jdbc-export-linux jdbc-export.exe
 
+jdbc-export-linux:
+	native-image -jar jdbc-export.jar --no-fallback
 
+jdbc-export.exe:
+	native-image -jar jdbc-export.jar --no-fallback

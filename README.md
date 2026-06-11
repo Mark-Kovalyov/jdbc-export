@@ -4,7 +4,7 @@ JDBC-export is tiny and flexible CLI to to export tables from JDBC compatible da
 
 ![Build Status](https://github.com/Mark-Kovalyov/jdbc-export/actions/workflows/jdbc-export-test.yml/badge.svg)
 
-Fieatures:
+Features:
 - supports databases:
   - Oracle
   - DB2 
@@ -20,9 +20,13 @@ Fieatures:
   - AVRO
   - Parquet 
   - protobuf (Google Protobuf) 
-  - not supported yet, but planned:
-    - Delta Table
-    - Apache ORC
+
+
+## Planned:
+
+- Support modern data formats:
+  - Delta Table
+  - Apache ORC
 - support native compillation using GraalVM for:
   - Windows
   - Linux
@@ -31,7 +35,9 @@ Fieatures:
 
 ## 0) Help:
 ```
-$ java -jar jdbc-export.jar
+$ java -jar jdbc-export.jar 
+usage:
+
     _  ____  ____  ____        ________  _ ____  ____  ____ _____
    / |/  _ \/  __\/   _\      /  __/\  \///  __\/  _ \/  __Y__ __\
    | || | \|| | //|  /  _____ |  \   \  / |  \/|| / \||  \/| / \
@@ -47,18 +53,19 @@ $ java -jar jdbc-export.jar
  -q,--query <arg>         SELECT-expression (ex: SELECT * FROM EMP)
  -r,--recordname <arg>    Optional parameter for AVRO and Parquet
  -u,--url <arg>           JDBC url. (ex:jdbc:oracle:thin@localhost:1521/XE
+
 ```
 
 ## 1) Export Oracle table scott.emp into CSV file:
 
 ```bash
-java -jar jdbc-export.jar -u "jdbc:oracle:thin:scott/tiger@localhost:1521/ORCL" --schema scott --table emp --outputfile emp.csv --format csv
+java -jar jdbc-export.jar -u "jdbc:oracle:thin:scott/tiger@localhost:1521/ORCL" --outputfile emp.csv --format csv --q "select empno, ename, job from scott.emp"
 ```
 
 ## 2) Export SQLite table using custom query and JSON as output format
 
 ```bash
-java -jar jdbc-export.jar -u "jdbc:sqlite:books" --query "select name, sha1, size from books" --outputfile books.jsonl --format jsonl
+java -jar jdbc-export.jar -u "jdbc:sqlite:books" --query "select * from torrent_names" --outputfile books.jsonl --format jsonl
 ```
 
 ## 3) Export with XML output format
@@ -75,6 +82,7 @@ java -jar jdbc-export.jar ..... --format avro --compression snappy
 ```sh
 java -jar jdbc-export.jar jdbc:mariadb://localhost:3306/testdb --query "select name, id from clients where category = '141'" .....
 ```
+
 ## 6) Export from SQLIte into Apache Parquet file with snappy compression:
 ```sh
 java -jar jdbc-export.jar \
