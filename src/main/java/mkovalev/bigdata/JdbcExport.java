@@ -99,6 +99,7 @@ public class JdbcExport {
                 switch (format) {
                     case "csv"     : formatter = new CsvFormatter(); break;
                     case "jsonl"   : formatter = new JsonLineFormatter(); break;
+                    case "jsonl2"  : formatter = new JsonLineFormatter2(); break;
                     case "xml"     : formatter = new XmlFormatter(); break;
                     case "avro"    : formatter = new AvroFormatter(); break;
                     case "parquet" : formatter = new ParquetFormatter(); break;
