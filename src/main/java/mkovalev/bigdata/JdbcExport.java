@@ -4,6 +4,8 @@ import mkovalev.bigdata.formatters.*;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.FileOutputStream;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +38,10 @@ public class JdbcExport {
     public static void main(String[] args) throws Exception {
         logger.trace("os.name      = {}", System.getProperty("os.name"));
         logger.trace("java.version = {}", System.getProperty("java.version"));
+        long pid = ProcessHandle.current().pid();
+        try(FileOutputStream fos = new FileOutputStream("jdbc-export.pid")) {
+            fos.write(String.valueOf(pid).getBytes());
+        }
         CommandLineParser parser = new DefaultParser();
         Options options = createOptions();
         if (args.length == 0) {
@@ -97,13 +103,12 @@ public class JdbcExport {
                 logger.info("Start export");
                 ExportFormatter formatter = null;
                 switch (format) {
-                    case "csv"     : formatter = new CsvFormatter(); break;
-                    case "jsonl"   : formatter = new JsonLineFormatter(); break;
-                    case "jsonl2"  : formatter = new JsonLineFormatter2(); break;
-                    case "xml"     : formatter = new XmlFormatter(); break;
-                    case "avro"    : formatter = new AvroFormatter(); break;
-                    case "parquet" : formatter = new ParquetFormatter(); break;
-                    case "protobuf": formatter = new ProtoFormatter(); break;
+                    case "csv"     : formatter = (ExportFormatter) new CsvFormatter(); break;
+                    case "jsonl"   : formatter = (ExportFormatter) new JsonLineFormatter(); break;
+                    case "xml"     : formatter = (ExportFormatter) new XmlFormatter(); break;
+                    case "avro"    : formatter = (ExportFormatter) new AvroFormatter(); break;
+                    case "parquet" : formatter = (ExportFormatter) new ParquetFormatter(); break;
+                    case "protobuf": formatter = (ExportFormatter) new ProtoFormatter(); break;
                     default:
                         throw new JdbcExportException("Unknown format : " + format);
                 }
@@ -119,7 +124,7 @@ public class JdbcExport {
                 long elapsed = end - start;
                 logger.info("Export finished. rows = {}, elapsed_time = {} s, speed = {} rows/s",
                         rows,
-                        elapsed,
+                        elapsed / 1000,
                         (int) ((double) rows / elapsed));
             } catch (Exception ex) {
                 logger.error("{}", ex.getMessage());

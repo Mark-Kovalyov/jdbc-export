@@ -54,18 +54,20 @@ public class ProtoFormatter implements ExportFormatter{
             Descriptors.Descriptor descProto = descFile.findMessageTypeByName(table);
             DynamicMessage.Builder messageBuilder = DynamicMessage.newBuilder(descProto);
             // TODO: Works too slow. Should be profiled using Perf / async-profiler
-            while (rs.next()) {
-                messageBuilder.clear();
-                for (int i = 1; i <= columnCount; i++) {
-                    if (rs.getObject(i) != null) {
+            while (rs.next()) { // 6s
+                messageBuilder.clear(); // 6s
+                for (int i = 1; i <= columnCount; i++) { // 6s
+                    if (rs.getObject(i) != null) { // 8 s
                         Object value = rs.getObject(i);
-                        Class<? extends Object> objType = rs.getObject(i).getClass();
+                        Class<? extends Object> objType = rs.getObject(i).getClass(); // 15 s
+                        // TODO: Test for correctness of index:
+                        Descriptors.FieldDescriptor fieldDescriptor = descProto.findFieldByNumber(i);
+                        //Descriptors.FieldDescriptor fieldDescriptor = descProto.findFieldByName(columnNames[i]);
                         if (objType == Timestamp.class) {
                             Timestamp ts = rs.getTimestamp(i);
-                            // TODO: Introduce custom local date time format
-                            messageBuilder.setField(descProto.findFieldByName(columnNames[i]), ts.toLocalDateTime().toString());
+                            messageBuilder.setField(fieldDescriptor, ts.toLocalDateTime().toString());
                         } else {
-                            messageBuilder.setField(descProto.findFieldByName(columnNames[i]), value);
+                            messageBuilder.setField(fieldDescriptor, value);
                         }
                     }
                 }
