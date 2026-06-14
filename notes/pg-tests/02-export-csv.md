@@ -28,7 +28,7 @@ bigdata=> SELECT pg_size_pretty(pg_total_relation_size('torrent_names'));
 
 ## Run export script
 ```sh
-$ java -jar jdbc-export.jar --url "jdbc:postgresql://localhost:5432/bigdata?user=enot&password=*****" --format csv --outputfile torrent_names.csv -q "select * from torrent_names"
+java -jar jdbc-export.jar --url "jdbc:postgresql://localhost:5432/bigdata?user=enot&password=*****" --format csv --outputfile torrent_names.csv -q "select * from torrent_names"
 [INFO ] jdbc-export - Start analyze schema
 [INFO ] jdbc-export - Column 1: [null, null, null, null, null, null] (int8, JDBC type -5)
 [INFO ] jdbc-export - Column 2: [null, int8, null, null, null, null] (int4, JDBC type 4)
