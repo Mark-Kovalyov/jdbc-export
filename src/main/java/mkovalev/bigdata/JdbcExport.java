@@ -32,7 +32,7 @@ public class JdbcExport {
                 .addOption("c", "compression", true, "Optional parameter for AVRO and Parquet compression. See the documentation.")
                 .addOption("r", "recordname", true, "Optional parameter for AVRO and Parquet")
                 .addOption("n", "namespace", true, "Optional parameter for AVRO and Parquet")
-                .addRequiredOption("f", "format", true, "Export format: csv|jsonl|jsonl-jackson|xml|avro|parquet|protobuf|null")
+                .addRequiredOption("f", "format", true, "Export format: csv|jsonl|jsonl-jackson|xml|orc|avro|parquet|protobuf|null")
                 .addRequiredOption("o", "outputfile", true, "Output file name (ex: emp.csv)");
     }
 
@@ -114,6 +114,7 @@ public class JdbcExport {
                     case "avro"    : formatter = (ExportFormatter) new AvroFormatter(); break;
                     case "parquet" : formatter = (ExportFormatter) new ParquetFormatter(); break;
                     case "protobuf": formatter = (ExportFormatter) new ProtoFormatter(); break;
+                    case "orc"     : formatter = (ExportFormatter) new OrcFormatter(); break;
                     case "null"    : formatter = (ExportFormatter) new NullOutputFormatter(); break;
                     default:
                         throw new JdbcExportException("Unknown format : " + format);
