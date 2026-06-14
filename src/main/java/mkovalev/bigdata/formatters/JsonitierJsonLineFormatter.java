@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 import java.util.Map;
 
 @SuppressWarnings("java:S1135")
-public class JsonLineFormatter implements ExportFormatter {
+public class JsonitierJsonLineFormatter implements ExportFormatter {
 
     static Logger logger = LoggerFactory.getLogger("json-line-formatter");
 

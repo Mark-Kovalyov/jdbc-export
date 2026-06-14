@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileOutputStream;
 import java.sql.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public class JdbcExport {
                 .addOption("c", "compression", true, "Optional parameter for AVRO and Parquet compression. See the documentation.")
                 .addOption("r", "recordname", true, "Optional parameter for AVRO and Parquet")
                 .addOption("n", "namespace", true, "Optional parameter for AVRO and Parquet")
-                .addRequiredOption("f", "format", true, "Export format: csv|jsonl|xml|avro|parquet|protobuf")
+                .addRequiredOption("f", "format", true, "Export format: csv|jsonl|jsonl-jackson|xml|avro|parquet|protobuf|null")
                 .addRequiredOption("o", "outputfile", true, "Output file name (ex: emp.csv)");
     }
 
@@ -58,6 +59,7 @@ public class JdbcExport {
             String query  = line.getOptionValue("query");
             String outputFile = line.getOptionValue("outputfile");
             String format = line.getOptionValue("format");
+            logger.info("Selected format: {}", format);
 
             Map<String, String> props = new HashMap<>();
 
@@ -103,16 +105,21 @@ public class JdbcExport {
                 logger.info("Start export");
                 ExportFormatter formatter = null;
                 switch (format) {
+                    // TODO: This is temporary solution. Should be unified to single one JSON formatter after memory issue fixing
+                    case "jsonl"         : formatter = (ExportFormatter) new JsonitierJsonLineFormatter(); break;
+                    case "jsonl-jackson" : formatter = (ExportFormatter) new JacksonLineFormatter(); break;
+
                     case "csv"     : formatter = (ExportFormatter) new CsvFormatter(); break;
-                    case "jsonl"   : formatter = (ExportFormatter) new JsonLineFormatter(); break;
                     case "xml"     : formatter = (ExportFormatter) new XmlFormatter(); break;
                     case "avro"    : formatter = (ExportFormatter) new AvroFormatter(); break;
                     case "parquet" : formatter = (ExportFormatter) new ParquetFormatter(); break;
                     case "protobuf": formatter = (ExportFormatter) new ProtoFormatter(); break;
+                    case "null"    : formatter = (ExportFormatter) new NullOutputFormatter(); break;
                     default:
                         throw new JdbcExportException("Unknown format : " + format);
                 }
                 // This is performance advice to reduce memory overhead for Postgresql JDBC
+                logger.info("Detected {}", formatter.getClass().getSimpleName());
                 PreparedStatement pst = conn.prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
                 if ("org.postgresql.jdbc.pgconnection".equals(driverName)) {
                     pst.setFetchSize(500); // TODO Refactor with strategy pattern to avoid driver specific code in main class
