@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class JacksonLineFormatter implements ExportFormatter {
 
-    static Logger logger = LoggerFactory.getLogger("json-line-formatter2");
+    static Logger logger = LoggerFactory.getLogger("jackson-json-line-formatter");
 
     @Override
     public long export(ResultSet rs, String query, int columnCount, String[] columnNames, String[] columnTypes,
@@ -50,7 +50,6 @@ public class JacksonLineFormatter implements ExportFormatter {
                                 jg.writeNumber(rs.getDouble(i));
                             }
                             case "timestamp" -> {
-                                // TODO: Introduce custom local date time format
                                 Timestamp ts = rs.getTimestamp(i);
                                 jg.writeString(ts.toLocalDateTime().toString());
                             }
@@ -58,6 +57,7 @@ public class JacksonLineFormatter implements ExportFormatter {
                                 Blob blob = rs.getBlob(i);
                                 // TODO: Not tested yet
                                 jg.writeString(Hex.encodeHexString(blob.getBytes(0, (int) blob.length())));
+                                blob.free();
                             }
                             default -> throw new JdbcExportException("Unable to handle type " + columnTypes[i]);
                         }

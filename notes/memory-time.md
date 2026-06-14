@@ -1,15 +1,15 @@
 # Memory tests and Time test
 
-| Output Formatter                            | Xmx  | Elapsed Time (sec) |
-|---------------------------------------------|------|--------------------|
-| null                                        | 128M | 4                  |
-| CSV                                         | 128M | 25                 |
-| XML                                         | 128M | 30                 |
-| JSONL(Jsonitier)                            | 2G   | 18                 |
-| JSONL(fasterxml.jackson.core.JsonGenerator) | 128M | 24                 |
-| AVRO                                        | 128M | 35                 |
-| Parquet                                     | 256M | 28                 |
-| Protobuf                                    | 128M | 60                 |
+| Output Formatter                            | Xmx    | Elapsed Time (sec) |
+|---------------------------------------------|--------|--------------------|
+| null                                        | 128M   | 4                  |
+| CSV                                         | 128M   | 25                 |
+| XML                                         | 128M   | 30                 |
+| JSONL(Jsonitier)                            | 2G (!) | 18                 |
+| JSONL(fasterxml.jackson.core.JsonGenerator) | 128M   | 24                 |
+| AVRO                                        | 128M   | 35                 |
+| Parquet                                     | 256M   | 28                 |
+| Protobuf                                    | 128M   | 60  (!)            |
 
 ```sh
 #!/bin/bash

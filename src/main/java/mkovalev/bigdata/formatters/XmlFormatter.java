@@ -17,12 +17,15 @@ public class XmlFormatter implements ExportFormatter{
 
     static Logger logger = LoggerFactory.getLogger("xml-formatter");
 
+
     private static String sanitizeForXml(String text) {
         StringBuilder sb = new StringBuilder(text.length());
         for (char c : text.toCharArray()) {
             if (c >= 0x20 && c < 128) {
                 sb.append(c);
             } else {
+                // TODO: Not sure is it good idea to replace non-ascii symbols into XML literals
+                //       Check for better way.
                 sb.append("&#x").append(Integer.toHexString(c)).append(";");
             }
         }

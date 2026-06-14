@@ -16,13 +16,13 @@ import java.util.Map;
 @SuppressWarnings("java:S1135")
 public class JsonitierJsonLineFormatter implements ExportFormatter {
 
-    static Logger logger = LoggerFactory.getLogger("json-line-formatter");
+    static Logger logger = LoggerFactory.getLogger("jsonitier-line-formatter");
 
     @Override
     public long export(ResultSet rs, String query, int columnCount, String[] columnNames, String[] columnTypes,
                        String path, Map<String,String> props) throws JdbcExportException {
         long rows = 0L;
-        try (JsonStream stream = new JsonStream(new FileOutputStream(path), 4096)) { // TODO: Benchmark optimal buffer size
+        try (JsonStream stream = new JsonStream(new FileOutputStream(path), 4096)) {
             while (rs.next()) {
                 stream.writeObjectStart();
                 for (int i = 1; i <= columnCount; i++) {
@@ -37,7 +37,6 @@ public class JsonitierJsonLineFormatter implements ExportFormatter {
                             case "int8", "BIGINT" -> stream.writeVal(rs.getLong(i));
                             case "float8", "REAL", "DOUBLE PRECISION" -> stream.writeVal(rs.getDouble(i));
                             case "timestamp" -> {
-                                // TODO: Introduce custom local date time format
                                 Timestamp ts = rs.getTimestamp(i);
                                 stream.writeVal(ts.toLocalDateTime().toString());
                             }
@@ -45,6 +44,7 @@ public class JsonitierJsonLineFormatter implements ExportFormatter {
                                 Blob blob = rs.getBlob(i);
                                 // TODO: Not tested yet
                                 stream.writeVal(Hex.encodeHexString(blob.getBytes(0, (int) blob.length())));
+                                blob.free();
                             }
                             default -> throw new JdbcExportException("Unable to handle type " + columnTypes[i]);
                         }

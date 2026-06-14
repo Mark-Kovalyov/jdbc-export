@@ -31,7 +31,15 @@ Features:
   - Windows
   - Linux
 
-# Exapmple
+## Not a goal:
+
+- Support for complex data types, like Geometry (points, lines), Arrays, Structs, etc.
+- Support legacy data formats like 
+  - DBase
+  - FoxPro
+- Support for Microsoft Excel or Access formats, because they are not suitable for big data
+
+# Exapmples
 
 ## 0) Help:
 ```
@@ -47,12 +55,13 @@ usage:
  -c,--compression <arg>   Optional parameter for AVRO and Parquet
                           compression. See the documentation.
  -f,--format <arg>        Export format:
-                          csv|jsonl|xml|avro|parquet|protobuf
+                          csv|jsonl|jsonl-jackson|xml|avro|parquet|protobuf|null
  -n,--namespace <arg>     Optional parameter for AVRO and Parquet
  -o,--outputfile <arg>    Output file name (ex: emp.csv)
  -q,--query <arg>         SELECT-expression (ex: SELECT * FROM EMP)
  -r,--recordname <arg>    Optional parameter for AVRO and Parquet
  -u,--url <arg>           JDBC url. (ex:jdbc:oracle:thin@localhost:1521/XE
+
 
 ```
 
@@ -93,16 +102,21 @@ java -jar jdbc-export.jar \
      --outputfile /bigdata/tpb.sbappy.parquet
 ```
 
+## 7) Authomate routine:
+```sh
+alias jexp="java -jar bin/jdbc-export.jar $*"
+```
+
 # Appendix:
 
 ## JDBC driver urls for network connection for different types of DBMS:
-| DBMS          | Driver                          | Connection string examples                                              | Desc                    |
-|---------------|---------------------------------|-------------------------------------------------------------------------|-------------------------|
-| Oracle        | oracle.jdbc.driver.OracleDriver | jdbc:oracle:thin:scott/tiger@localhost:1521/ORCL                        | ORCL is a test database 
-| MySQL/MariaDb |                                 | dbc:mariadb://localhost:3306/testdb                                     |
-| IBM/Db2       |                                 | jdbc:db2:STLEC1:user=dbadm;password=dbadm                               |
-| PostgreSQL    |                                 | jdbc:postgresql://localhost:5455/your_database_name                     |     
-| PostgreSQL    |                                 | jdbc:postgresql://buh.account.org:5455/sklad??user=elena&password=***** | Credentials             |  
+| DBMS          | Connection string examples                                              | Comments                |
+|---------------|-------------------------------------------------------------------------|-------------------------|
+| Oracle        | jdbc:oracle:thin:scott/tiger@localhost:1521/ORCL                        | ORCL is a test database 
+| MySQL/MariaDb | dbc:mariadb://localhost:3306/testdb                                     |
+| IBM/Db2       | jdbc:db2:STLEC1:user=dbadm;password=dbadm                               | 
+| PostgreSQL    | jdbc:postgresql://localhost:5455/your_database_name                     |     
+| PostgreSQL    | jdbc:postgresql://buh.account.org:5455/sklad??user=elena&password=***** |                         |  
 
 ## JDBC driver url for file connection
 | DBMS   | Driver | Connection string examples           | Desc                    |

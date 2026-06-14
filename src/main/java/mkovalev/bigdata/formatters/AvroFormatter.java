@@ -69,7 +69,6 @@ public class AvroFormatter implements ExportFormatter{
                         Class<? extends Object> objType = rs.getObject(i).getClass();
                         if (objType == Timestamp.class) {
                             Timestamp ts = rs.getTimestamp(i);
-                            // TODO: Introduce custom local date time format 
                             tableRecord.put(columnNames[i], ts.toLocalDateTime().toString());
                         } else {
                             tableRecord.put(columnNames[i], value);
